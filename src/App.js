@@ -1,25 +1,35 @@
-import React from 'react';
-import logo from './logo.svg';
-import './App.css';
+import React, { useState } from "react";
+import useFetchApi from "./useFetchApi";
+import { Container } from "react-bootstrap";
+import JobsPagination from "./JobsPagination";
+import SearchForm from "./SearchForm";
+import Job from "./Job";
 
 function App() {
+  const [params, setPrams] = useState({});
+  const [page, setPage] = useState(1);
+  const { jobs, loading, error, hasNextPage } = useFetchApi(params, page);
+
+  function handleParamChange(e) {
+    const param = e.target.name;
+    const value = e.target.value;
+    setPage(1);
+    setPrams((prevPrams) => {
+      return { ...prevPrams, [param]: value };
+    });
+  }
+
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
-    </div>
+    <Container>
+      <SearchForm params={params} onParamChange={handleParamChange} />
+      <JobsPagination page={page} setPage={setPage} hasNextPage={hasNextPage} />
+      {loading && <h1>loading...</h1>}
+      {error && <h1>error</h1>}
+      {jobs.map((x) => {
+        return <Job key={x.id} job={x} />;
+      })}
+      <JobsPagination page={page} setPage={setPage} hasNextPage={hasNextPage} />
+    </Container>
   );
 }
 
